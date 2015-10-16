@@ -1,0 +1,5 @@
+*__pycache__*
+db_repository
+flask
+migrations
+*.db

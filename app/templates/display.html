@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block head %}
+  {% if title %}
+  <title>{{ title }} - Where I am</title>
+  {% else %}
+  <title>Welcome to Where I am</title>
+  {% endif %}
+{{ super() }}
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+  <script>
+var osmap;
+
+function addMarker(date_str, latitude, longitude) {
+    L.marker([latitude, longitude]).addTo(osmap).bindPopup(
+        "<p>GPS coordinates :</p><p>" + latitude + ", " + longitude + " at " + date_str + "</p>");
+    osmap.panTo([latitude, longitude]);
+}
+
+function createOSMap(latitude, longitude) {
+    osmap = L.map('openstreetmap').setView([latitude, longitude], 12);
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(osmap);
+}
+
+function render(date_str, latitude, longitude) {
+    if (!osmap) {
+        createOSMap(latitude, longitude);
+    }
+    addMarker(date_str, latitude, longitude);
+}
+
+{% for location in target.locations %}
+render('{{ location.date_str }}', {{ location.latitude}}, {{ location.longitude}});
+{% endfor %}
+
+  </script>
+{% endblock %}
+{% block page_content %}
+  <h1>Hello, {{ user.nickname }}!</h1>
+  <h3>Looking for {{ target.nickname }}</h3>
+   <div id="openstreetmap" style="width: 800px; height: 600px">
+    <div id="interlude" style="text-align: center; line-height: 600px; font-weight: bold; border: 1px dotted grey; background-color: #eee;">
+        Map currently unavailable.
+   </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,14 @@
+Dear {{ user.nickname }},
+
+Welcome to Where I Am!
+
+To confirm your account please click on the following link:
+
+{{ url_for('auth.confirm', token=token, _external=True) }}
+
+Sincerely,
+
+The Where I Am Team
+
+Note: Please do not reply to this email, this address is not monitored.
+
