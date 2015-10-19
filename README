@@ -1,0 +1,10 @@
+Upload GPS coordinates and share them with other users.  The application
+allows you to share and display location data using the Open Street Maps
+map data.  This project will eventually be paired with an Android
+application for sharing location data between authenticated phones.
+
+I built it with lots of help from Miguel Grinberg's awesome book Flask
+Web Development.  Some code has been lifted directly from his repo and
+was originally licensed under the MIT License.  The code from the Flasky
+projects remains under the MIT License, but all modifications and all
+new code are GPLv3+.
