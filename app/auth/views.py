@@ -49,17 +49,23 @@ def confirm(token):
         flash('You have confirmed your account. Thanks!')
     else:
         flash('The confirmation link is invalid or has expired.')
-        return redirect(url_for('auth.confirm'))
+        return redirect(url_for('auth.unconfirmed'))
     return redirect(url_for('main.index'))
 
 @auth.route('/confirm')
 @login_required
 def resend_confirmation():
-    token = user.generate_congirmation_token()
+    token = current_user.generate_confirmation_token()
     send_email(user.email, 'Confirm your Where I Am account', 'auth/email/confirm',
                user=user, token=token)
     flash('A new confirmation email has been sent to your address.')
     return redirect(url_for('main.index'))
+
+@auth.route('/unconfirmed')
+def unconfirmed():
+    if current_user.is_anonymous() or current_user.confirmed:
+        return redirect(url_for('mail.index'))
+    return render_template('auth/unconfirmed.html')
 
 @auth.route('/change-password', methods=['GET', 'POST'])
 @login_required
@@ -126,7 +132,6 @@ def change_email_request():
             flash('Invalid email or password.')
     return render_template("auth/change_email.html", form=form)
 
-
 @auth.route('/change-email/<token>')
 @login_required
 def change_email(token):
@@ -136,4 +141,10 @@ def change_email(token):
         flash('Invalid request.')
     return redirect(url_for('main.index'))
 
+@auth.before_app_request
+def before_request():
+    if current_user.is_authenticated() and \
+       not current+user.confirmed and \
+       request.endpoint[:5] != 'auth.':
+        return redirect(url_for('auth.unconfirmed'))
 
