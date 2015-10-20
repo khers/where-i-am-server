@@ -13,7 +13,7 @@ class Config:
 
     # Mail configuration
     MAIL_SUBJECT_PREFIX = '[WhereIam] '
-    MAIL_SENDER = 'WhereIam Admin <whereiam@mgebm.net>'
+    MAIL_SENDER = 'WhereIam Admin <whereiam@domain.tld>'
 
     # App configuration
     WHEREIAM_ADMIN = os.environ.get('WHEREIAM_ADMIN')
