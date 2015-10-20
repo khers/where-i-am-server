@@ -1,7 +1,7 @@
 #!flask/bin/python
 import os
 from app import create_app, db
-from app.models import User, Location
+from app.models import User, Location, ReadPermission
 from flask.ext.script import Manager, Shell
 from flask.ext.migrate import Migrate, MigrateCommand
 

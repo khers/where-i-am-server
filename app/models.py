@@ -94,3 +94,9 @@ class Location(db.Model):
     when = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+class ReadPermission(db.Model):
+    __tablename__ = 'read_permissions'
+    id = db.Column(db.Integer, primary_key=True)
+    grantor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    grantee_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
