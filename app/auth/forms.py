@@ -1,8 +1,8 @@
 from flask.ext.wtf import Form
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectMultipleField
 from wtforms.validators import Required, Length, Email, Regexp, EqualTo
 from wtforms import ValidationError
-from ..models import User
+from ..models import User, ReadPermission
 
 class LoginForm(Form):
     email = StringField('Email', validators=[Required(), Length(1,64), Email()])
@@ -56,3 +56,10 @@ class ChangeEmailForm(Form):
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
+
+class PermissionsForm(Form):
+    available = SelectMultipleField('Users that cannot read your location data',
+                                    coerce=int)
+    can_read = SelectMultipleField('Users who can read your location data',
+                                   coerce=int)
+    submit = SubmitField('Update Permissions')

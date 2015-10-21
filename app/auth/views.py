@@ -1,10 +1,11 @@
 from flask import render_template, redirect, request, url_for, flash
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from . import auth
-from ..models import User
+from .. import db
+from ..models import User, ReadPermission
 from ..email import send_email
 from .forms import LoginForm, RegistrationForm, ChangePasswordForm
-from .forms import PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm
+from .forms import PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm, PermissionsForm
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -140,6 +141,60 @@ def change_email(token):
     else:
         flash('Invalid request.')
     return redirect(url_for('main.index'))
+
+@auth.route('/change_permissions', methods=['GET', 'POST'])
+@login_required
+def change_permissions():
+    users = dict()
+
+    user_ids = set()
+    for user in User.query.all():
+        if user.id == current_user.id:
+            continue
+        user_ids.add(user.id)
+        users[user.id] = user
+    reader_ids = set()
+    for perms in ReadPermission.query.filter_by(grantor_id=current_user.id):
+        reader_ids.add(perms.grantee_id)
+
+    all_opts = []
+    for user_id in user_ids:
+        all_opts.append((user_id,users[user_id].nickname))
+    user_ids -= reader_ids
+    available_opts = []
+    for user_id in user_ids:
+        available_opts.append((user_id,users[user_id].nickname))
+    can_read_opts = []
+    for user_id in reader_ids:
+        can_read_opts.append((user_id,users[user_id].nickname))
+
+    form = PermissionsForm(request.form)
+    if request.method == 'POST':
+        form.can_read.choices = all_opts
+        form.available.choices = all_opts
+        if form.validate():
+            new_reader_ids = set(form.can_read.data)
+            for user_id in form.can_read.data:
+                if user_id in reader_ids:
+                    continue
+                perm = ReadPermission()
+                perm.grantor_id = current_user.id
+                perm.grantee_id = user_id
+                db.session.add(perm)
+            # Any entry that was there before the form and is not there now
+            # needs to be removed
+            for user_id in reader_ids - new_reader_ids:
+                perm = ReadPermission.query.filter_by(grantor_id=current_user.id, grantee_id=user_id).first()
+                db.session.delete(perm)
+            flash('Permissions updated.')
+            return redirect(url_for('main.index'))
+
+    form.available.choices = available_opts
+    form.can_read.choices = can_read_opts
+
+    return render_template('auth/change_permissions.html', form=form)
+
+
 
 @auth.before_app_request
 def before_request():

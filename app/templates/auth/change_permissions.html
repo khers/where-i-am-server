@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Where I Am - Permission Management{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+	function assign_object() {
+		return !$('#available option:selected').remove().appendTo('#can_read');
+	}
+
+	function unassign_object() {
+		return !$('#can_read option:selected').remove().appendTo('#available');
+	}
+
+	$(document).ready( function() {
+		$('#available').dblclick( assign_object );
+		$('#can_read').dblclick( unassign_object );
+	});
+</script>
+{% endblock %}
+
+{% block page_content %}
+<div class="page-headers">
+	<h1>Users in the top box cannot view your location data.  Users in the bottom box can.  Double click a user to change their permissions.</h1>
+</div>
+<div class="col-md-4">
+	{{ wtf.quick_form(form) }}
+</div>
+{% endblock %}
+
