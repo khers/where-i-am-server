@@ -1,10 +1,10 @@
-from datetime import datetime
-from flask import render_template, flash, redirect, session, url_for
+from datetime import datetime, timezone
+from flask import render_template, flash, redirect, session, url_for, request
 from flask.ext.login import login_required, current_user
 from . import main
 from .. import db
 from ..models import User, Location, ReadPermission
-from .forms import DisplayForm
+from .forms import DisplayForm, LocationForm
 
 @main.route('/')
 def start():
@@ -55,4 +55,21 @@ def display(target):
                    ]
                }
     return render_template('display.html', user=current_user, target=target)
+
+@main.route('/add_location', methods=['GET', 'POST'])
+@login_required
+def add_location():
+    form = LocationForm()
+    if request.method == 'GET':
+        form.when.data = datetime.now(timezone.utc)
+    if form.validate_on_submit():
+        loc = Location()
+        loc.latitude = form.latitude.data
+        loc.longitude = form.longitude.data
+        loc.when = form.when.data
+        loc.user_id = current_user.id
+        db.session.add(loc)
+        flash('Location entry added.')
+        return redirect(url_for('main.index'))
+    return render_template('add_location.html', form=form)
 
