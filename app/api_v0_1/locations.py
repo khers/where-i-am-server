@@ -1,8 +1,10 @@
 from flask import jsonify, request, current_app, url_for, g
 from . import api
+from .decorators import authentication_required
 from ..models import User, Location, ReadPermission
 
 @api.route('/locations/last', methods=['POST'])
+@authentication_required()
 def get_last():
     count = int(request.json.get('count'))
     if count is None or count < 0:
@@ -18,6 +20,7 @@ def get_last():
     return jsonify({ 'locations': [ loc.to_json() for loc in locations] })
 
 @api.route('/locations/range', methods=['POST'])
+@authentication_required()
 def get_range():
     target = request.json.get('target')
     if target is None:

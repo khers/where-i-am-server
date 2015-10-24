@@ -1,9 +1,11 @@
 from app import db
 from flask import jsonify, request, current_app, url_for, g
 from . import api
+from .decorators import authentication_required
 from ..models import User, ReadPermission
 
 @api.route('/permissions/add_read', methods=['POST'])
+@authentication_required()
 def add_read():
     target = request.json.get('target')
     if target is None:
@@ -18,6 +20,7 @@ def add_read():
     return jsonify({'result': 201})
 
 @api.route('/permissions/del_read', methods=['POST'])
+@authentication_required()
 def del_read():
     target = request.json.get('target')
     if target is None:

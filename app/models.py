@@ -1,6 +1,6 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask.ext.login import UserMixin
+from flask.ext.login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, url_for
 
@@ -106,6 +106,11 @@ from . import login_manager
 @login_manager.user_loader
 def load_user(uid):
     return User.query.get(int(uid))
+
+class AnonymousUser(AnonymousUserMixin):
+    pass
+
+login_manager.anonymous_user = AnonymousUser
 
 class Location(db.Model):
     __tablename__ = 'locations'
