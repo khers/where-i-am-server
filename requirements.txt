@@ -2,6 +2,7 @@ Babel==2.1.1
 Flask==0.10.1
 Flask-Babel==0.9
 Flask-Bootstrap==3.3.5.6
+Flask-HTTPAuth==2.7.0
 Flask-Login==0.3.2
 Flask-Mail==0.9.1
 Flask-Migrate==1.6.0

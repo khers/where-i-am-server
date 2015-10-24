@@ -17,8 +17,6 @@ class User(UserMixin, db.Model):
         json_user = {
                 'id': self.id,
                 'nickname': self.nickname,
-                'locations': url_for('api.locations.last', id=self.id, _external=True),
-                'permissions': url_for('api.get_permissions', id=self.id, _external=True)
             }
         return json_user
 
@@ -89,7 +87,7 @@ class User(UserMixin, db.Model):
     def generate_auth_token(self, expiration):
         s = Serializer(current_app.config['SECRET_KEY'],
                 expires_in=expiration)
-        return s.dumps({'id': self.id})
+        return s.dumps({'id': self.id}).decode('ascii')
 
     @staticmethod
     def verify_auth_token(token):
@@ -141,15 +139,14 @@ class Location(db.Model):
 
     @staticmethod
     def load_count(uid, count):
-        if count < 1:
-            return []
         results = Location.query.filter_by(user_id=uid).order_by(Location.when.desc())
+        if count < 1:
+            return results
         return results[:count]
-
 
     @staticmethod
     def load_date_range(uid, start, end, count=0):
-        results = Location.query.filter(user_id == uid, Location.when > start, Location.when < end).order_by(Location.when.desc())
+        results = Location.query.filter(Location.user_id == uid, Location.when > start, Location.when < end).order_by(Location.when.desc())
         if count != 0:
             return results[:count]
         return results
