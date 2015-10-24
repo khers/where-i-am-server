@@ -14,7 +14,7 @@ def start():
 @login_required
 def index():
     form = DisplayForm()
-    options = []
+    options = [(current_user.id, current_user.nickname)]
     for perm in ReadPermission.query.filter_by(grantee_id=current_user.id):
         user = User.query.get(perm.grantor_id)
         if user is None:
