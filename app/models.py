@@ -2,7 +2,7 @@ from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from flask import current_app
+from flask import current_app, url_for
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -12,6 +12,15 @@ class User(UserMixin, db.Model):
     locations = db.relationship('Location', backref='who', lazy='dynamic')
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.Boolean, default=False)
+
+    def to_json(self):
+        json_user = {
+                'id': self.id,
+                'nickname': self.nickname,
+                'locations': url_for('api.locations.last', id=self.id, _external=True),
+                'permissions': url_for('api.get_permissions', id=self.id, _external=True)
+            }
+        return json_user
 
     @property
     def password(self):
@@ -77,6 +86,20 @@ class User(UserMixin, db.Model):
         db.session.add(self)
         return True
 
+    def generate_auth_token(self, expiration):
+        s = Serializer(current_app.config['SECRET_KEY'],
+                expires_in=expiration)
+        return s.dumps({'id': self.id})
+
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token)
+        except:
+            return None
+        return User.query.get(data['id'])
+
     def __repr__(self):
         return '<User %r>' % (self.nickname)
 
@@ -94,9 +117,70 @@ class Location(db.Model):
     when = db.Column(db.DateTime)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
+    def to_json(self):
+        json_location = {
+                'latitude': self.latitude,
+                'longitude': self.longitude,
+                'when': self.when,
+                'who': url_for('api.get_user', id=self.user_id, _external=True)
+            }
+        return json_location
+
+    @staticmethod
+    def from_json(json_loc):
+        lat = json_loc.get('latitude')
+        if lat is None or lat == '':
+            raise ValidationError('Location is missing latitude')
+        lng = json_loc.get('longitude')
+        if lng is None or lng == '':
+            raise ValidationError('Location is missing longitude')
+        when = json_loc.get('when')
+        if when is None or when == '':
+            raise ValidationError('Location is missing a time stamp')
+        return Location(latitude=latitude, longitude=longitude, when=when)
+
+    @staticmethod
+    def load_count(uid, count):
+        if count < 1:
+            return []
+        results = Location.query.filter_by(user_id=uid).order_by(Location.when.desc())
+        return results[:count]
+
+
+    @staticmethod
+    def load_date_range(uid, start, end, count=0):
+        results = Location.query.filter(user_id == uid, Location.when > start, Location.when < end).order_by(Location.when.desc())
+        if count != 0:
+            return results[:count]
+        return results
+
 class ReadPermission(db.Model):
     __tablename__ = 'read_permissions'
     id = db.Column(db.Integer, primary_key=True)
     grantor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     grantee_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def to_json(self):
+        grantee = User.query.filter_by(id=grantee_id).first()
+        json_permission = {
+                   'id': grantee_id,
+                    'nickname': grantee.nickname
+                }
+        return json_permission
+
+    @staticmethod
+    def from_json(json_perm):
+        id = json_perm.get('id')
+        if id is None or id == '':
+            raise ValidationError('Permission does not have grantee id')
+        return ReadPermission(grantee_id=id)
+
+    @staticmethod
+    def has_permission(target, reader):
+        # A user always has permission to view their own data
+        if target == reader:
+            return True
+        if ReadPermission.query.filter_by(grantor_id=target, grantee_id=reader).first() is not None:
+            return True
+        return False
 

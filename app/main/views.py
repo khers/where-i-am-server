@@ -14,47 +14,46 @@ def start():
 @login_required
 def index():
     form = DisplayForm()
+    options = []
+    for perm in ReadPermission.query.filter_by(grantee_id=current_user.id):
+        user = User.query.get(perm.grantor_id)
+        if user is None:
+            continue
+        options.append((user.id, user.nickname))
+    form.target.choices = options
+
     if form.validate_on_submit():
-        user = User.query.filter_by(nickname=form.string.data).first()
+        user = User.query.filter_by(id=form.target.data).first()
         # Was the data a valid nickname?
         if user is None:
-            # Nope, was it an email?
-            user = User.query.filter_by(email=form.string.data).first()
-            if user is None:
-                flash('Invalid username or email.')
-                return redirect(url_for('main.index'))
-        return redirect(url_for('main.display', target=user.nickname))
+            flash('Invalid username or email.')
+            return redirect(url_for('main.index'))
+        return redirect(url_for('main.display', target=user.id, count=form.count.data))
     return render_template('index.html', form=form)
 
-@main.route('/display/<target>')
+@main.route('/display/<int:target>/<int:count>')
 @login_required
-def display(target):
-    target_user = User.query.filter_by(nickname=target).first()
+def display(target, count):
+    target_user = User.query.filter_by(id=target).first()
     if target_user is None:
-       flash('Invalid target name or email.')
+       flash('Invalid target user.')
        return redirect(url_for('main.index'))
 
-    perms = ReadPermission.query.filter_by(grantor_id=target_user.id, grantee_id=current_user.id)
-    if perms is None and current_user.id != target_user.id:
+    if not ReadPermission.has_permission(target, current_user.id):
         flash("You don't have permission to read the target user's location data.")
         return redirect(url_for('main.index'))
 
-    results = sorted(target_user.locations, key=lambda loc:loc.when, reverse=True)
+    results = Location.load_count(target, count)
     if not results:
         flash('The requested user does not have any available location data.')
         return redirect(url_for('main.index'))
-
-    loc = results[0]
-    target = { 'nickname': target_user.nickname,
-               'locations': [
-                   {
-                       'date_str': loc.when,
-                       'latitude': loc.latitude,
-                       'longitude': loc.longitude
-                    }
-                   ]
+    locations = []
+    for loc in results:
+        locations.append({'date_str': loc.when, 'latitude': loc.latitude, 'longitude': loc.longitude})
+    data = { 'nickname': target_user.nickname,
+               'locations': locations
                }
-    return render_template('display.html', user=current_user, target=target)
+    return render_template('display.html', user=current_user, target=data)
 
 @main.route('/add_location', methods=['GET', 'POST'])
 @login_required

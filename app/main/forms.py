@@ -1,10 +1,13 @@
 from flask.ext.wtf import Form
-from wtforms import StringField, SubmitField, DecimalField
+from wtforms import StringField, SubmitField, DecimalField, SelectField
 from wtforms.ext.dateutil.fields import DateTimeField
 from wtforms.validators import Required, Length, NumberRange
 
+COUNT = [(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')]
+
 class DisplayForm(Form):
-    string = StringField('Nickname or Email to display', validators=[Required(), Length(1, 64)])
+    target = SelectField('User to display', coerce=int)
+    count = SelectField('How much location history to display', coerce=int, choices=COUNT, default=1)
     submit = SubmitField('Get Locations')
 
 class LocationForm(Form):

@@ -194,8 +194,6 @@ def change_permissions():
 
     return render_template('auth/change_permissions.html', form=form)
 
-
-
 @auth.before_app_request
 def before_request():
     if current_user.is_authenticated and \
