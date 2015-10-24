@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app, url_for
+from datetime import datetime, timezone
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -124,23 +125,24 @@ class Location(db.Model):
         json_location = {
                 'latitude': self.latitude,
                 'longitude': self.longitude,
-                'when': self.when,
+                'when': self.when.timestamp(),
                 'who': url_for('api.get_user', id=self.user_id, _external=True)
             }
         return json_location
 
     @staticmethod
-    def from_json(json_loc):
+    def from_json(json_loc, uid):
         lat = json_loc.get('latitude')
         if lat is None or lat == '':
             raise ValidationError('Location is missing latitude')
         lng = json_loc.get('longitude')
         if lng is None or lng == '':
             raise ValidationError('Location is missing longitude')
-        when = json_loc.get('when')
+        when = datetime.fromtimestamp(float(json_loc.get('when')), timezone.utc)
         if when is None or when == '':
             raise ValidationError('Location is missing a time stamp')
-        return Location(latitude=latitude, longitude=longitude, when=when)
+        return Location(latitude=float(lat), longitude=float(lng),
+                        when=when, user_id=uid)
 
     @staticmethod
     def load_count(uid, count):

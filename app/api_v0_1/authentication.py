@@ -3,6 +3,7 @@ from ..models import User, AnonymousUser
 from .errors import unauthorized, forbidden
 from flask import g, jsonify
 from . import api
+from .decorators import authentication_required
 
 auth = HTTPBasicAuth()
 
@@ -29,8 +30,9 @@ def auth_error():
     return unauthorized('Invalid credentials')
 
 @api.route('/token')
+@authentication_required()
 def get_token():
-    if g.current_user.is_anonymous or g.token_used:
+    if g.token_used:
         return unauthorized('Invalid credentials')
     return jsonify({'token': g.current_user.generate_auth_token(expiration=3600), 'expiration': 3600})
 
