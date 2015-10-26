@@ -34,7 +34,7 @@ def register():
                     password=form.password.data)
         db.session.add(user)
         db.session.commit()
-        token = user.generate_congirmation_token()
+        token = user.generate_confirmation_token()
         send_email(user.email, 'Confirm your Where I Am account', 'auth/email/confirm',
                    user=user, token=token)
         flash('A confirmation email has been sent to your address.')
@@ -57,14 +57,14 @@ def confirm(token):
 @login_required
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
-    send_email(user.email, 'Confirm your Where I Am account', 'auth/email/confirm',
-               user=user, token=token)
+    send_email(current_user.email, 'Confirm your Where I Am account', 'auth/email/confirm',
+               user=current_user, token=token)
     flash('A new confirmation email has been sent to your address.')
     return redirect(url_for('main.index'))
 
 @auth.route('/unconfirmed')
 def unconfirmed():
-    if current_user.is_anonymous() or current_user.confirmed:
+    if current_user.is_anonymous or current_user.confirmed:
         return redirect(url_for('mail.index'))
     return render_template('auth/unconfirmed.html')
 
