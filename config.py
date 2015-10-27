@@ -13,8 +13,8 @@ class Config:
 
     # Mail configuration
     MAIL_SUBJECT_PREFIX = '[WhereIam] '
-    MAIL_SENDER = 'WhereIam Admin <whereiam@domain.tld>'
-    MAIL_SERVER = 'smtp.googlemail.com'
+    MAIL_SENDER = 'WhereIam Admin <whereiam@mgebm.net>'
+    MAIL_SERVER = 'mail.mgebm.net'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
@@ -65,9 +65,21 @@ class ProductionConfig(Config):
         mail_handler.setLevel(logging.Error)
         app.logger.addHandler(mail_handler)
 
+class UNixConfig(ProductionConfig):
+    @classmethod
+    def init_app(cls, app):
+        ProductionConfig.init_app(app)
+
+        # log to syslog
+        import logging
+        from logging.handlers import SysLogHandler
+        syslog_handler = SysLogHandler()
+        syslog_handler.setLevel(logging.WARNING)
+        app.logger.addHandler(syslog_handler)
+
 config = {
     'development': DevelopmentConfig,
-    'production': ProductionConfig,
+    'production': UnixConfig,
     'testing': TestingConfig,
     'default': DevelopmentConfig
 }
