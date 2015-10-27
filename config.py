@@ -62,10 +62,10 @@ class ProductionConfig(Config):
             subject=cls.MAIL_SUBJECT_PREFIX + 'Application Error',
             credentials=credentials,
             secure=secure)
-        mail_handler.setLevel(logging.Error)
+        mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
 
-class UNixConfig(ProductionConfig):
+class UnixConfig(ProductionConfig):
     @classmethod
     def init_app(cls, app):
         ProductionConfig.init_app(app)
@@ -81,6 +81,6 @@ config = {
     'development': DevelopmentConfig,
     'production': UnixConfig,
     'testing': TestingConfig,
-    'default': DevelopmentConfig
+    'default': UnixConfig
 }
 
