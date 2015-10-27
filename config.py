@@ -14,7 +14,7 @@ class Config:
     # Mail configuration
     MAIL_SUBJECT_PREFIX = '[WhereIam] '
     MAIL_SENDER = 'WhereIam Admin <whereiam@mgebm.net>'
-    MAIL_SERVER = 'mail.mgebm.net'
+    MAIL_SERVER = 'smtp.googlemail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
