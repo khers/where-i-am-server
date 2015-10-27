@@ -2,7 +2,7 @@ from flask import jsonify, request, current_app, url_for, g
 from . import api
 from .decorators import authentication_required
 from ..models import User, ReadPermission
-from ..email import send_email
+from ..mailer import send_email
 
 @api.route('/user/<int:id>')
 @authentication_required()
