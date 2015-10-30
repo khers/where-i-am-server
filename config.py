@@ -30,17 +30,17 @@ class Config:
 class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or \
-            'sqlite:///' + os.path.join(basedir, 'whereami-dev.db')
+            'sqlite:///' + os.path.join(basedir, 'whereiam-dev.db')
 
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or \
-            'sqlite:///' + os.path.join(basedir, 'whereami-test.db')
+            'sqlite:///' + os.path.join(basedir, 'whereiam-test.db')
     WTF_CSRF_ENABLED = False
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or \
-            'sqlite:///' + os.path.join(basedir, 'whereami.db')
+            'sqlite:///' + os.path.join(basedir, 'whereiam.db')
 
     @classmethod
     def init_app(cls, app):
