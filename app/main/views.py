@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from flask import render_template, flash, redirect, session, url_for, request
 from flask.ext.login import login_required, current_user
 from . import main

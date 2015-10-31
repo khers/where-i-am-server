@@ -3,7 +3,7 @@ from app import db
 from . import api
 from .decorators import authentication_required
 from ..models import User, Location, ReadPermission
-from datetime import datetime, timezone
+from datetime import datetime
 
 @api.route('/locations/last', methods=['POST'])
 @authentication_required()
