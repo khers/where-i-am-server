@@ -43,6 +43,18 @@ def get_range():
     locations = Location.load_date_range(target, start, end, count)
     return jsonify({ 'locations': [ loc.to_json() for loc in locations] })
 
+@api.route('/locations/delete', methods=['POST'])
+@authentication_required()
+def delete_location():
+    loc_ids = set(request.json.get('location_ids'))
+    if -1 in loc_ids:
+        if len(loc_ids) > 1:
+            raise ValidationError('Cannot specify All (-1) and other locations together')
+        Location.delete_all_by_user(g.current_user)
+    else:
+        Location.delete_set(loc_ids, g.current_user)
+    return jsonify({'reponse': 'OK'})
+
 @api.route('/locations/create', methods=['POST'])
 @authentication_required()
 def create_location():

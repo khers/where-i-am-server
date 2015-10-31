@@ -158,6 +158,19 @@ class Location(db.Model):
             return results[:count]
         return results
 
+    @staticmethod
+    def delete_all_by_user(user):
+        for loc in Location.query.filter_by(user_id=user.id):
+            db.session.delete(loc)
+
+    @staticmethod
+    def delete_set(loc_ids, user):
+        for id in loc_ids:
+            loc = Location.query.filter_by(id=id).first()
+            if loc.user_id == user.id:
+                db.session.delete(loc)
+
+
 class ReadPermission(db.Model):
     __tablename__ = 'read_permissions'
     id = db.Column(db.Integer, primary_key=True)

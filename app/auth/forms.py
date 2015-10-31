@@ -57,6 +57,18 @@ class ChangeEmailForm(Form):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
 
+class DeleteLocationsForm(Form):
+    locations = SelectMultipleField('Your location data', coerce=int)
+    confirm = BooleanField("I'm really sure")
+    submit = SubmitField('Delete Selected Locations')
+
+    def validate_locations(self, field):
+        loc_ids = set(field.data)
+        if len(loc_ids) == 0:
+            raise ValidationError('Not locations selected')
+        if -1 in loc_ids and len(loc_ids) > 1:
+            raise ValidationError('Cannot select locations and All')
+
 class PermissionsForm(Form):
     available = SelectMultipleField('Users that cannot read your location data',
                                     coerce=int)

@@ -2,9 +2,9 @@ from flask import render_template, redirect, request, url_for, flash
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from . import auth
 from .. import db
-from ..models import User, ReadPermission
+from ..models import User, ReadPermission, Location
 from ..mailer import send_email
-from .forms import LoginForm, RegistrationForm, ChangePasswordForm
+from .forms import LoginForm, RegistrationForm, ChangePasswordForm, DeleteLocationsForm
 from .forms import PasswordResetRequestForm, PasswordResetForm, ChangeEmailForm, PermissionsForm
 
 @auth.route('/login', methods=['GET', 'POST'])
@@ -141,6 +141,28 @@ def change_email(token):
     else:
         flash('Invalid request.')
     return redirect(url_for('main.index'))
+
+@auth.route('/delete_locations', methods=['GET', 'POST'])
+@login_required
+def delete_locations():
+    options = [(-1, 'All'),]
+    for loc in Location.query.filter_by(user_id=current_user.id):
+        options.append((loc.id, loc.when))
+    form = DeleteLocationsForm(request.form)
+    form.locations.choices = options
+    if request.method == 'POST' and form.validate():
+        if not form.confirm.data:
+            flash('Not deleting location(s) becuase you were not sure.')
+        else:
+            loc_ids = set(form.locations.data)
+            if -1 in loc_ids:
+                Location.delete_all_by_user(current_user)
+            else:
+                Location.delete_set(loc_ids, current_user)
+            flash('Deleted selected locations.')
+        return redirect(url_for('main.index'))
+
+    return render_template('auth/delete_locations.html', form=form)
 
 @auth.route('/change_permissions', methods=['GET', 'POST'])
 @login_required
