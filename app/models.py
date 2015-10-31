@@ -138,7 +138,7 @@ class Location(db.Model):
         lng = json_loc.get('longitude')
         if lng is None or lng == '':
             raise ValidationError('Location is missing longitude')
-        when = datetime.fromtimestamp(float(json_loc.get('when')), timezone.utc)
+        when = datetime.fromtimestamp(float(json_loc.get('when')))
         if when is None or when == '':
             raise ValidationError('Location is missing a time stamp')
         return Location(latitude=float(lat), longitude=float(lng),

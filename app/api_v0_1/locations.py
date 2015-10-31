@@ -33,10 +33,10 @@ def get_range():
     count = int(request.json.get('count'))
     if count is None or count < 0:
         count = 0
-    start = datetime.fromtimestamp(request.json.get('start'), timezone.utc)
+    start = datetime.fromtimestamp(request.json.get('start'))
     if start is None:
         raise ValidationError('missing date start argument')
-    end = datetime.fromtimestamp(request.json.get('end'), timezone.utc)
+    end = datetime.fromtimestamp(request.json.get('end'))
     if end is None:
         raise ValidationError('missing date end argument')
 

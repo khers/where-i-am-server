@@ -60,7 +60,7 @@ def display(target, count):
 def add_location():
     form = LocationForm()
     if request.method == 'GET':
-        form.when.data = datetime.now(timezone.utc)
+        form.when.data = datetime.utcnow()
     if form.validate_on_submit():
         loc = Location()
         loc.latitude = form.latitude.data
