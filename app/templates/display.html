@@ -7,12 +7,12 @@
   <title>Welcome to Where I am</title>
   {% endif %}
 {{ super() }}
-  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
   <script>
 var osmap;
 
@@ -24,8 +24,8 @@ function addMarker(date_str, latitude, longitude) {
 
 function createOSMap(latitude, longitude) {
     osmap = L.map('openstreetmap').setView([latitude, longitude], 12);
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(osmap);
 }
 
